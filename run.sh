@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 #
 # * autocheck RDP_CUSE_MAJOR
 # * netaardvark-dns
@@ -21,7 +21,7 @@ main() {
   step_build_pod
   step_restart_pod
 
-  fatal 0 Station ID: ${STATION_ID}
+  info Station ID: ${STATION_ID}
 
   # while ls /dev | grep ${RDP_CUSE_MAJOR}, | grep -v rdp_cdev; do
   #   echo ${RDP_CUSE_MAJOR} already taken as major device
@@ -133,6 +133,7 @@ step_required_programs() {
 
 step_required_libs() {
   fail_level=3
+  [ -e /etc/NIXOS ] && return 0
   step_info REQUREMENTS LIBRARIES
   for lib in $*; do
     sudo ldconfig -p | grep ${lib} >/dev/null 2>&1 || fatal ${fail_level} ${lib} not installed.
@@ -202,7 +203,7 @@ step_build_pod() {
   step_info BUILD_POD
   project=rdp_station_${STATION_ID}
   build_log=./logs/build_${project}.log
-  
+ 
   podman-compose --project-name ${project} build > ${build_log} 2>&1 || \
     tail_log ${fail_level} ${build_log} Failed to build ${project}.
   tail -n 2 ${build_log} | grep Error: && tail_log ${fail_level} ${build_log} Failed to build ${project}.
@@ -227,7 +228,7 @@ step_restart_pod() {
     tail_log ${fail_level} ${run_log} Faile to start ${project}
   
   info Successfully started ${project}.
-  echo
+  info
   info Code is accessable at port ${CODE_PORT}
   info App and api is accessable at port ${BASE_PORT}
 }
